@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudentHub | Serverless Student Management</title>
+    <meta name="description" content="Serverless student management dashboard built with AWS API Gateway, Lambda and DynamoDB.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app">
+
+    <!-- ============ SIDEBAR ============ -->
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-logo">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+            </div>
+            <div>
+                <strong>StudentHub</strong>
+                <small>Serverless Edition</small>
+            </div>
+        </div>
+
+        <nav class="nav">
+            <a href="#overview" class="active"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Overview</a>
+            <a href="#students"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Students</a>
+        </nav>
+
+        <div class="sidebar-card">
+            <div class="status-row"><span class="dot" id="apiDot"></span><span id="apiStatusText">Checking API…</span></div>
+            <p>Region <code>ap-southeast-2</code><br>Stage <code>dev</code></p>
+        </div>
+
+        <div class="sidebar-foot">
+            <button class="icon-btn" id="themeToggle" title="Toggle theme" aria-label="Toggle theme">
+                <svg viewBox="0 0 24 24" class="i-moon"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                <svg viewBox="0 0 24 24" class="i-sun"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+            </button>
+            <span>Built on AWS</span>
+        </div>
+    </aside>
+
+    <!-- ============ MAIN ============ -->
+    <main class="main">
+
+        <header class="topbar" id="overview">
+            <div>
+                <h1>Student Management</h1>
+                <p>Serverless CRUD platform powered by API Gateway, Lambda &amp; DynamoDB</p>
+            </div>
+            <div class="topbar-actions">
+                <span class="env-pill">DEV</span>
+                <button class="btn primary" id="addBtn">
+                    <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+                    Add Student
+                </button>
+            </div>
+        </header>
+
+        <!-- Stats -->
+        <section class="stats">
+            <article class="stat">
+                <div class="stat-icon blue"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+                <div><span>Total Students</span><h3 id="statTotal">—</h3></div>
+            </article>
+            <article class="stat">
+                <div class="stat-icon violet"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
+                <div><span>Active Courses</span><h3 id="statCourses">—</h3></div>
+            </article>
+            <article class="stat">
+                <div class="stat-icon green"><svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
+                <div><span>Added (7 days)</span><h3 id="statRecent">—</h3></div>
+            </article>
+        </section>
+
+        <!-- Students + chart -->
+        <section class="grid-main" id="students">
+            <div class="card table-card">
+                <div class="card-head">
+                    <div>
+                        <h2>Student Records</h2>
+                        <p id="resultMeta">Loading…</p>
+                    </div>
+                    <div class="head-actions">
+                        <button class="btn ghost sm" id="refreshBtn">
+                            <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                            Refresh
+                        </button>
+                    </div>
+                </div>
+
+                <div class="toolbar">
+                    <div class="search">
+                        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                        <input id="searchInput" type="search" placeholder="Filter by name / course — press Enter on a full email to search via API" autocomplete="off">
+                    </div>
+                    <button class="btn primary sm" id="apiSearchBtn">API Search</button>
+                    <select id="courseFilter" aria-label="Filter by course"><option value="">All courses</option></select>
+                </div>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th data-sort="name">Student <span class="sort"></span></th>
+                                <th data-sort="student_id">ID <span class="sort"></span></th>
+                                <th data-sort="course">Course <span class="sort"></span></th>
+                                <th data-sort="created_at">Joined <span class="sort"></span></th>
+                                <th class="right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card chart-card">
+                <div class="card-head"><div><h2>Course Distribution</h2><p>Students per course</p></div></div>
+                <div id="chart" class="chart"></div>
+            </div>
+        </section>
+
+        <footer class="footer">Built with AWS API Gateway · Lambda · DynamoDB · Vanilla JS</footer>
+    </main>
+</div>
+
+<!-- ============ MODALS ============ -->
+<div class="modal" id="formModal" hidden>
+    <div class="modal-box">
+        <div class="modal-head">
+            <h2 id="formTitle">Add Student</h2>
+            <button class="icon-btn" data-close aria-label="Close">✕</button>
+        </div>
+        <form id="studentForm" novalidate>
+            <input type="hidden" id="studentId">
+            <label>Full name
+                <input id="fName" type="text" placeholder="e.g. Aarav Sharma" required>
+            </label>
+            <label>Email address
+                <input id="fEmail" type="email" placeholder="e.g. aarav@example.com" required>
+            </label>
+            <label>Course
+                <input id="fCourse" type="text" list="courseList" placeholder="e.g. AWS Cloud Computing" required>
+                <datalist id="courseList"></datalist>
+            </label>
+            <p class="form-error" id="formError"></p>
+            <div class="modal-foot">
+                <button type="button" class="btn ghost" data-close>Cancel</button>
+                <button type="submit" class="btn primary" id="formSubmit">Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal" id="detailModal" hidden>
+    <div class="modal-box">
+        <div class="modal-head">
+            <h2>Student Profile</h2>
+            <button class="icon-btn" data-close aria-label="Close">✕</button>
+        </div>
+        <div id="detailBody"></div>
+    </div>
+</div>
+
+<div class="modal" id="confirmModal" hidden>
+    <div class="modal-box small">
+        <div class="modal-head"><h2>Delete student?</h2></div>
+        <p id="confirmText" class="muted"></p>
+        <div class="modal-foot">
+            <button class="btn ghost" data-close>Cancel</button>
+            <button class="btn danger" id="confirmBtn">Delete</button>
+        </div>
+    </div>
+</div>
+
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
