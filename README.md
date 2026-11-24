@@ -7,8 +7,7 @@ A fully serverless student management platform built on **AWS API Gateway, AWS L
 ![DynamoDB](https://img.shields.io/badge/Amazon-DynamoDB-4053D6?logo=amazondynamodb&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/Frontend-Vanilla%20JS-F7DF1E?logo=javascript&logoColor=black)
 
-<!-- Add a dashboard screenshot at docs/screenshots/dashboard.png -->
-![Dashboard](docs/screenshots/dashboard.png)
+![Dashboard](frontend/assets/Dashboard.png)
 
 ## ✨ Features
 
