@@ -20,18 +20,7 @@ A fully serverless student management platform built on **AWS API Gateway, AWS L
 
 ## 🏗️ Architecture
 
-```text
-Browser (HTML / CSS / JS)
-        │  HTTPS
-        ▼
-Amazon API Gateway  (REST API, stage: dev)
-        │
-        ▼
-AWS Lambda  (Python, one function per route)
-        │
-        ▼
-Amazon DynamoDB  (table: StudentRecord, GSI: EmailIndex)
-```
+![Architecture](architecture/Student%20Management%20AWS%20Architecture.png)
 
 | Setting | Value |
 |---|---|
@@ -158,23 +147,6 @@ Each folder in `backend/lambda_functions/` is one function (`app.py` with a `lam
 | `AWS_REGION` | `ap-southeast-2` |
 
 > **Tip:** enable **Lambda Proxy integration** on each API Gateway method. The Lambda functions return `{statusCode, headers, body}`, and without proxy integration that envelope is passed back as the response body. The frontend handles both cases.
-
-## 🔒 Security Notes
-
-This project is a **development / learning build**:
-
-- No authentication is configured yet (planned: Amazon Cognito or IAM authorizers)
-- CORS allows `*`; restrict it to your frontend domain for production
-- Search is an exact email match and uses an eventually consistent GSI, so a record just created may take a moment to appear
-
-## 🛣️ Roadmap
-
-- [ ] Authentication with Amazon Cognito
-- [ ] Infrastructure as Code (AWS SAM / Terraform)
-- [ ] Host the frontend on S3 + CloudFront
-- [ ] Unit tests with `pytest` and `moto`
-- [ ] CI/CD with GitHub Actions
-- [ ] Pagination for the list endpoint
 
 ## 🧰 Tech Stack
 
